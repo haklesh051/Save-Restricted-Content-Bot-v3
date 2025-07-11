@@ -1,12 +1,7 @@
-# Copyright (c) 2025 devgagan : https://github.com/devgaganin.  
-# Licensed under the GNU General Public License v3.0.  
-# See LICENSE file in the repository root for full license text.
-
 import asyncio
 from shared_client import start_client
 import importlib
 import os
-import sys
 
 async def load_and_run_plugins():
     await start_client()
@@ -17,25 +12,15 @@ async def load_and_run_plugins():
         module = importlib.import_module(f"plugins.{plugin}")
         if hasattr(module, f"run_{plugin}_plugin"):
             print(f"Running {plugin} plugin...")
-            await getattr(module, f"run_{plugin}_plugin")()  
+            await getattr(module, f"run_{plugin}_plugin")()
 
 async def main():
     await load_and_run_plugins()
     while True:
-        await asyncio.sleep(1)  
+        await asyncio.sleep(3600)
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    print("Starting clients ...")
     try:
-        loop.run_until_complete(main())
+        asyncio.run(main())  # Safe event loop
     except KeyboardInterrupt:
-        print("Shutting down...")
-    except Exception as e:
-        print(e)
-        sys.exit(1)
-    finally:
-        try:
-            loop.close()
-        except Exception:
-            pass
+        print("🔻 Bot बंद किया गया (Ctrl+C)")
