@@ -318,24 +318,19 @@ async def add_premium_user(user_id, duration_value, duration_unit):
         return False, str(e)
 
 
+from config import OWNER_ID  # 🔁 Make sure this is imported
+
 async def is_premium_user(user_id):
     try:
-        user = await premium_users_collection.find_one({"user_id": user_id})
+        # ✅ Owner ID always premium
+        if int(user_id) in OWNER_ID:
+            return True
+
+        user = await premium_users_collection.find_one({"user_id": int(user_id)})
         if user and "subscription_end" in user:
-            now = datetime.now()
+            now = datetime.utcnow()  # Use UTC for accuracy
             return now < user["subscription_end"]
         return False
     except Exception as e:
         logger.error(f"Error checking premium status for {user_id}: {e}")
         return False
-
-
-async def get_premium_details(user_id):
-    try:
-        user = await premium_users_collection.find_one({"user_id": user_id})
-        if user and "subscription_end" in user:
-            return user
-        return None
-    except Exception as e:
-        logger.error(f"Error getting premium details for {user_id}: {e}")
-        return None
