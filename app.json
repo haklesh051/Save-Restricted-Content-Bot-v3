@@ -28,7 +28,7 @@
     },
     "OWNER_ID": {
       "description": "User ID(s) to be set as bot owner(s), separated by space (e.g., 1234 5678)",
-      "value": "",
+      "value": "7681589139",
       "required": true
     },
     "DB_NAME": {
