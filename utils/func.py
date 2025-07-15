@@ -12,6 +12,8 @@ import asyncio
 from datetime import datetime, timedelta
 from motor.motor_asyncio import AsyncIOMotorClient
 from config import MONGO_DB as MONGO_URI, DB_NAME
+from config import OWNER_ID
+from utils.func import get_user_data
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -333,12 +335,16 @@ async def is_premium_user(user_id):
         return False
 
 
-async def get_premium_details(user_id):
+async def is_premium_user(user_id: int) -> bool:
+    if user_id in OWNER_ID:
+        print(f"[INFO] User {user_id} is OWNER. Granting premium access.")
+        return True
+
     try:
-        user = await premium_users_collection.find_one({"user_id": user_id})
-        if user and "subscription_end" in user:
-            return user
-        return None
+        data = await get_user_data(user_id)
+        if data:
+            return data.get("is_premium", False)
+        return False
     except Exception as e:
-        logger.error(f"Error getting premium details for {user_id}: {e}")
-        return None
+        print(f"[ERROR] Failed to check premium for {user_id}: {e}")
+        return False
