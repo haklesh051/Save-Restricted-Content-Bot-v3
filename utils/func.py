@@ -320,10 +320,13 @@ async def add_premium_user(user_id, duration_value, duration_unit):
 
 async def is_premium_user(user_id):
     try:
+        if user_id in OWNER_ID:
+            return True  # 👑 Owner is always premium
+
         user = await premium_users_collection.find_one({"user_id": user_id})
         if user and "subscription_end" in user:
             now = datetime.now()
-            return now < user["subscription_end"]
+            return now < user["subscription_end"]  # ✅ Check time
         return False
     except Exception as e:
         logger.error(f"Error checking premium status for {user_id}: {e}")
