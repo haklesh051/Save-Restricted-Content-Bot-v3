@@ -12,8 +12,6 @@ import asyncio
 from datetime import datetime, timedelta
 from motor.motor_asyncio import AsyncIOMotorClient
 from config import MONGO_DB as MONGO_URI, DB_NAME
-from config import OWNER_ID
-from utils.func import get_user_data
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -322,29 +320,22 @@ async def add_premium_user(user_id, duration_value, duration_unit):
 
 async def is_premium_user(user_id):
     try:
-        if user_id in OWNER_ID:
-            return True  # 👑 Owner is always premium
-
         user = await premium_users_collection.find_one({"user_id": user_id})
         if user and "subscription_end" in user:
             now = datetime.now()
-            return now < user["subscription_end"]  # ✅ Check time
+            return now < user["subscription_end"]
         return False
     except Exception as e:
         logger.error(f"Error checking premium status for {user_id}: {e}")
         return False
 
 
-async def is_premium_user(user_id: int) -> bool:
-    if user_id in OWNER_ID:
-        print(f"[INFO] User {user_id} is OWNER. Granting premium access.")
-        return True
-
+async def get_premium_details(user_id):
     try:
-        data = await get_user_data(user_id)
-        if data:
-            return data.get("is_premium", False)
-        return False
+        user = await premium_users_collection.find_one({"user_id": user_id})
+        if user and "subscription_end" in user:
+            return user
+        return None
     except Exception as e:
-        print(f"[ERROR] Failed to check premium for {user_id}: {e}")
-        return False
+        logger.error(f"Error getting premium details for {user_id}: {e}")
+        return None
